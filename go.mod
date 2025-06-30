@@ -5,7 +5,7 @@ go 1.20
 //replace github.com/lestrrat-go/jwx/v2 => ../jwx
 
 require (
-	github.com/ip2location/ip2location-go/v9 v9.6.0
+	github.com/ip2location/ip2location-go/v9 v9.7.1
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lestrrat-go/jwx/v2 v2.0.11
 	github.com/mattn/go-sqlite3 v1.14.18
