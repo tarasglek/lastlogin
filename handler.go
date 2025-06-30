@@ -10,8 +10,7 @@ import (
 )
 
 type Handler struct {
-	mux         *http.ServeMux
-	behindProxy bool
+	mux *http.ServeMux
 }
 
 func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *JOSE) *Handler {
@@ -19,8 +18,7 @@ func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *J
 	mux := http.NewServeMux()
 
 	h := &Handler{
-		mux:         mux,
-		behindProxy: conf.BehindProxy,
+		mux: mux,
 	}
 
 	var err error
@@ -241,7 +239,5 @@ func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *J
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	remoteIp, _ := getRemoteIp(r, h.behindProxy)
-	fmt.Printf("%s %s %s %s\n", remoteIp, r.Method, r.Host, r.URL)
 	h.mux.ServeHTTP(w, r)
 }

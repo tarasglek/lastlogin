@@ -118,13 +118,25 @@ func genRandomCode() (string, error) {
 func buildCookieDomain(domain string) (string, error) {
 
 	fmt.Printf("buildCookieDomain input: %s\n", domain)
-	hostParts := strings.Split(domain, ".")
+
+	host, _, err := net.SplitHostPort(domain)
+	if err != nil {
+		// Not a host:port, maybe just host. Use as is.
+		host = domain
+	}
+
+	// check if host is an IP address
+	if net.ParseIP(host) != nil {
+		return host, nil
+	}
+
+	hostParts := strings.Split(host, ".")
 
 	// TODO: This should probably be using the public suffix list. It's
 	// currently hardcoded for only certain domains
 	if len(hostParts) < 3 {
 		// apex domain
-		return domain, nil
+		return host, nil
 	} else {
 		cookieDomain := strings.Join(hostParts[1:], ".")
 		return cookieDomain, nil
