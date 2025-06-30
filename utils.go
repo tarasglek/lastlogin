@@ -116,6 +116,7 @@ func genRandomCode() (string, error) {
 
 func buildCookieDomain(domain string) (string, error) {
 
+	fmt.Printf("buildCookieDomain input: %s\n", domain)
 	hostParts := strings.Split(domain, ".")
 
 	// TODO: This should probably be using the public suffix list. It's
