@@ -24,6 +24,7 @@ type commonData struct {
 }
 
 func newCommonData(overrides *commonData, db Database, r *http.Request) *commonData {
+	fmt.Printf("newCommonData: r.Host=%q, X-Forwarded-Host=%q\n", r.Host, r.Header.Get("X-Forwarded-Host"))
 	d := &commonData{}
 
 	if overrides != nil {
@@ -252,6 +253,7 @@ func addIdentToCookie(domain string, db Database, cookieValue string, newIdent *
 
 func addLoginToCookie(db Database, r *http.Request, clientId string, newLogin *Login) (*http.Cookie, error) {
 
+	fmt.Printf("addLoginToCookie: r.Host=%q, X-Forwarded-Host=%q\n", r.Host, r.Header.Get("X-Forwarded-Host"))
 	domain := r.Host
 
 	prefix, err := db.GetPrefix()
