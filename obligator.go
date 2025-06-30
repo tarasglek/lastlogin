@@ -136,11 +136,16 @@ func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s.behindProxy {
-		xffHeader := r.Header.Get("X-Forwarded-For")
-		if xffHeader != "" {
-			parts := strings.Split(xffHeader, ",")
-			remoteIp := strings.TrimSpace(parts[0])
-			r.RemoteAddr = net.JoinHostPort(remoteIp, "0")
+		var clientIp string
+		if ip := r.Header.Get("Fly-Client-IP"); ip != "" {
+			clientIp = ip
+		} else if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+			parts := strings.Split(xff, ",")
+			clientIp = strings.TrimSpace(parts[0])
+		}
+
+		if clientIp != "" {
+			r.RemoteAddr = net.JoinHostPort(clientIp, "0")
 		}
 	}
 
