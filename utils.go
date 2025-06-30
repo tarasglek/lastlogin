@@ -32,7 +32,7 @@ func newCommonData(overrides *commonData, db Database, r *http.Request) *commonD
 	}
 
 	if overrides == nil || overrides.RootUri == "" {
-		d.RootUri = domainToUri(r.Host)
+		d.RootUri = domainToUri(getRequestHost(r))
 	} else {
 		d.RootUri = overrides.RootUri
 	}
@@ -266,7 +266,7 @@ func addIdentToCookie(domain string, db Database, cookieValue string, newIdent *
 func addLoginToCookie(db Database, r *http.Request, clientId string, newLogin *Login) (*http.Cookie, error) {
 
 	fmt.Printf("addLoginToCookie: r.Host=%q, X-Forwarded-Host=%q\n", r.Host, r.Header.Get("X-Forwarded-Host"))
-	domain := r.Host
+	domain := getRequestHost(r)
 
 	prefix, err := db.GetPrefix()
 	if err != nil {
@@ -499,6 +499,14 @@ func getRemoteIp(r *http.Request, behindProxy bool) (string, error) {
 	}
 
 	return remoteIp, nil
+}
+
+func getRequestHost(r *http.Request) string {
+	forwardedHost := r.Header.Get("X-Forwarded-Host")
+	if forwardedHost != "" {
+		return forwardedHost
+	}
+	return r.Host
 }
 
 // This function doesn't check against cross site requests as compared to

@@ -178,7 +178,9 @@ func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookieDomain, err := buildCookieDomain(r.Host)
+	host := getRequestHost(r)
+
+	cookieDomain, err := buildCookieDomain(host)
 	if err != nil {
 		w.WriteHeader(500)
 		io.WriteString(w, err.Error())
@@ -197,7 +199,7 @@ func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, crossSiteDetectorCookie)
 
-	fmt.Println(fmt.Sprintf("%s\t%s\t%s\t%s\t%s", timestamp, remoteIp, r.Method, r.Host, r.URL.String()))
+	fmt.Println(fmt.Sprintf("%s\t%s\t%s\t%s\t%s", timestamp, remoteIp, r.Method, host, r.URL.String()))
 	s.mux.ServeHTTP(w, r)
 }
 
