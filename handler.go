@@ -239,5 +239,6 @@ func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *J
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
 	h.mux.ServeHTTP(w, r)
 }
