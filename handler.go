@@ -71,7 +71,7 @@ func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *J
 	})
 
 	mux.HandleFunc("/ip", func(w http.ResponseWriter, r *http.Request) {
-		remoteIp, err := getRemoteIp(r, conf.BehindProxy)
+		remoteIp, err := getRemoteIp(r)
 		if err != nil {
 			w.WriteHeader(500)
 			io.WriteString(w, err.Error())

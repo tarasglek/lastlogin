@@ -36,7 +36,7 @@ func (h *AddIdentityEmailHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	h.mux.ServeHTTP(w, r)
 }
 
-func NewAddIdentityEmailHandler(db Database, cluster *Cluster, tmpl *template.Template, behindProxy bool, geoDb *ip2location.DB, jose *JOSE) *AddIdentityEmailHandler {
+func NewAddIdentityEmailHandler(db Database, cluster *Cluster, tmpl *template.Template, geoDb *ip2location.DB, jose *JOSE) *AddIdentityEmailHandler {
 	mux := http.NewServeMux()
 	h := &AddIdentityEmailHandler{
 		mux:           mux,
@@ -141,7 +141,7 @@ func NewAddIdentityEmailHandler(db Database, cluster *Cluster, tmpl *template.Te
 
 		magicLink := fmt.Sprintf("%s/magic?key=%s&instance_id=%s", serverUri, magicLinkKey, cluster.GetLocalId())
 
-		remoteIp, err := getRemoteIp(r, behindProxy)
+		remoteIp, err := getRemoteIp(r)
 		if err != nil {
 			w.WriteHeader(500)
 			io.WriteString(w, err.Error())
@@ -286,7 +286,7 @@ func NewAddIdentityEmailHandler(db Database, cluster *Cluster, tmpl *template.Te
 			return
 		}
 
-		remoteIp, err := getRemoteIp(r, behindProxy)
+		remoteIp, err := getRemoteIp(r)
 		if err != nil {
 			w.WriteHeader(500)
 			io.WriteString(w, err.Error())

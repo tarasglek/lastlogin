@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
-	"github.com/ip2location/ip2location-go/v9"
+	"github.comcom/ip2location/ip2location-go/v9"
 )
 
 const IdentityTypeEmail = "email"
@@ -133,6 +135,15 @@ func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Host = forwardedHost
 	}
 
+	if s.behindProxy {
+		xffHeader := r.Header.Get("X-Forwarded-For")
+		if xffHeader != "" {
+			parts := strings.Split(xffHeader, ",")
+			remoteIp := strings.TrimSpace(parts[0])
+			r.RemoteAddr = net.JoinHostPort(remoteIp, "0")
+		}
+	}
+
 	// TODO: implement generic redirects so LastLogin stuff isn't hard
 	// coded
 	if r.Host == "lastlogin.io" {
@@ -176,7 +187,7 @@ func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	timestamp := time.Now().Format(time.RFC3339)
 
-	remoteIp, err := getRemoteIp(r, s.behindProxy)
+	remoteIp, err := getRemoteIp(r)
 	if err != nil {
 		w.WriteHeader(500)
 		io.WriteString(w, err.Error())
@@ -377,7 +388,7 @@ func NewServer(conf ServerConfig) *Server {
 	mux.Handle("/login-oauth2", addIdentityOauth2Handler)
 	mux.Handle("/callback", addIdentityOauth2Handler)
 
-	addIdentityEmailHandler := NewAddIdentityEmailHandler(db, cluster, tmpl, conf.BehindProxy, geoDb, jose)
+	addIdentityEmailHandler := NewAddIdentityEmailHandler(db, cluster, tmpl, geoDb, jose)
 	mux.Handle("/login-email", addIdentityEmailHandler)
 	mux.Handle("/email-sent", addIdentityEmailHandler)
 	mux.Handle("/magic", addIdentityEmailHandler)

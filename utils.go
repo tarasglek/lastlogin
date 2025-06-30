@@ -484,17 +484,7 @@ func clearCookie(domain string, cookieKey string, w http.ResponseWriter) {
 	http.SetCookie(w, cookie)
 }
 
-func getRemoteIp(r *http.Request, behindProxy bool) (string, error) {
-	if behindProxy {
-		xffHeader := r.Header.Get("X-Forwarded-For")
-		if xffHeader != "" {
-			// X-Forwarded-For can be a comma-separated list of IPs. The
-			// first one is the original client.
-			parts := strings.Split(xffHeader, ",")
-			return strings.TrimSpace(parts[0]), nil
-		}
-	}
-
+func getRemoteIp(r *http.Request) (string, error) {
 	remoteIp, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return "", err
