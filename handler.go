@@ -26,7 +26,7 @@ func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *J
 	fsHandler := http.FileServer(http.Dir("static"))
 
 	handleIndieAuthUser := func(w http.ResponseWriter, r *http.Request) {
-		uri := fmt.Sprintf("%s/.well-known/oauth-authorization-server", domainToUri(getRequestHost(r)))
+		uri := fmt.Sprintf("%s/.well-known/oauth-authorization-server", domainToUri(r.Host))
 		link := fmt.Sprintf("<%s>; rel=\"indieauth-metadata\"", uri)
 		w.Header().Set("Link", link)
 
@@ -42,7 +42,7 @@ func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *J
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
-		domain, err := db.GetDomain(getRequestHost(r))
+		domain, err := db.GetDomain(r.Host)
 		if err != nil {
 			fsHandler.ServeHTTP(w, r)
 			return
@@ -163,7 +163,7 @@ func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *J
 			}
 		}
 
-		setReturnUriCookie(getRequestHost(r), db, returnUri, w)
+		setReturnUriCookie(r.Host, db, returnUri, w)
 
 		data := struct {
 			*commonData
@@ -205,7 +205,7 @@ func NewHandler(db Database, conf ServerConfig, tmpl *template.Template, jose *J
 
 		redirect := r.Form.Get("prev_page")
 
-		err = deleteLoginKeyCookie(getRequestHost(r), db, w)
+		err = deleteLoginKeyCookie(r.Host, db, w)
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(os.Stderr, err.Error())

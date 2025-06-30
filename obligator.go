@@ -128,6 +128,11 @@ func NewObligatorMux(behindProxy bool) *ObligatorMux {
 
 func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
+	forwardedHost := r.Header.Get("X-Forwarded-Host")
+	if forwardedHost != "" {
+		r.Host = forwardedHost
+	}
+
 	// TODO: implement generic redirects so LastLogin stuff isn't hard
 	// coded
 	if r.Host == "lastlogin.io" {
@@ -178,9 +183,7 @@ func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	host := getRequestHost(r)
-
-	cookieDomain, err := buildCookieDomain(host)
+	cookieDomain, err := buildCookieDomain(r.Host)
 	if err != nil {
 		w.WriteHeader(500)
 		io.WriteString(w, err.Error())
@@ -199,7 +202,7 @@ func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, crossSiteDetectorCookie)
 
-	fmt.Println(fmt.Sprintf("%s\t%s\t%s\t%s\t%s", timestamp, remoteIp, r.Method, host, r.URL.String()))
+	fmt.Println(fmt.Sprintf("%s\t%s\t%s\t%s\t%s", timestamp, remoteIp, r.Method, r.Host, r.URL.String()))
 	s.mux.ServeHTTP(w, r)
 }
 

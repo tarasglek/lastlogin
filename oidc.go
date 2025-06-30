@@ -72,7 +72,7 @@ func NewOIDCHandler(db Database, config ServerConfig, tmpl *template.Template, j
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
-		uri := fmt.Sprintf("https://%s", getRequestHost(r))
+		uri := fmt.Sprintf("https://%s", r.Host)
 
 		doc := OAuth2ServerMetadata{
 			Issuer:                           uri,
@@ -274,7 +274,7 @@ func NewOIDCHandler(db Database, config ServerConfig, tmpl *template.Template, j
 			return
 		}
 
-		setJwtCookie(db, getRequestHost(r), authRequestJwt, prefix+"auth_request", maxAge, w, r)
+		setJwtCookie(db, r.Host, authRequestJwt, prefix+"auth_request", maxAge, w, r)
 
 		providers, err := db.GetOAuth2Providers()
 		if err != nil {
@@ -300,7 +300,7 @@ func NewOIDCHandler(db Database, config ServerConfig, tmpl *template.Template, j
 		if providerId != "" {
 
 			returnUri := "/approve"
-			setReturnUriCookie(getRequestHost(r), db, returnUri, w)
+			setReturnUriCookie(r.Host, db, returnUri, w)
 
 			uri := fmt.Sprintf("/login-oauth2?oauth2_provider_id=%s", providerId)
 			http.Redirect(w, r, uri, 303)
@@ -330,7 +330,7 @@ func NewOIDCHandler(db Database, config ServerConfig, tmpl *template.Template, j
 			DisableQrLogin:      config.DisableQrLogin,
 		}
 
-		setReturnUriCookie(getRequestHost(r), db, returnUri, w)
+		setReturnUriCookie(r.Host, db, returnUri, w)
 
 		err = tmpl.ExecuteTemplate(w, "auth.html", data)
 		if err != nil {
@@ -381,7 +381,7 @@ func NewOIDCHandler(db Database, config ServerConfig, tmpl *template.Template, j
 			ProviderName: identity.ProviderName,
 		}
 
-		uri := domainToUri(getRequestHost(r))
+		uri := domainToUri(r.Host)
 
 		newLoginCookie, err := addLoginToCookie(db, r, clientId, newLogin)
 		if err != nil {
@@ -415,7 +415,7 @@ func NewOIDCHandler(db Database, config ServerConfig, tmpl *template.Template, j
 			expandedId = wildcardParts[0] + emailWildcard + wildcardParts[1]
 		}
 
-		clearCookie(getRequestHost(r), prefix+"auth_request", w)
+		clearCookie(r.Host, prefix+"auth_request", w)
 
 		idTokenBuilder := NewOIDCTokenBuilder().
 			Subject(expandedId).
