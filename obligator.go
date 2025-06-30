@@ -135,18 +135,16 @@ func (s *ObligatorMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Host = forwardedHost
 	}
 
-	if s.behindProxy {
-		var clientIp string
-		if ip := r.Header.Get("Fly-Client-IP"); ip != "" {
-			clientIp = ip
-		} else if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-			parts := strings.Split(xff, ",")
-			clientIp = strings.TrimSpace(parts[0])
-		}
+	var clientIp string
+	if ip := r.Header.Get("Fly-Client-IP"); ip != "" {
+		clientIp = ip
+	} else if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		parts := strings.Split(xff, ",")
+		clientIp = strings.TrimSpace(parts[0])
+	}
 
-		if clientIp != "" {
-			r.RemoteAddr = net.JoinHostPort(clientIp, "0")
-		}
+	if clientIp != "" {
+		r.RemoteAddr = net.JoinHostPort(clientIp, "0")
 	}
 
 	// TODO: implement generic redirects so LastLogin stuff isn't hard
